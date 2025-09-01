@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kviz: Računarski hardver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-light: #f9f9f9;
+      --bg-dark:  #1e1e1e;
+      --text-light: #000;
+      --text-dark:  #fff;
+      --accent:    #1976d2;
+      --correct:   #4caf50;
+      --incorrect: #f44336;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0; padding: 20px;
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: .3s;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: var(--bg-dark);
+        color: var(--text-dark);
+      }
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .container {
+      max-width: 700px; margin: auto;
+      background: rgba(255,255,255,0.05);
+      padding: 20px; border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .question { font-size: 1.2em; margin-bottom: 10px; }
+    .answers label {
+      display: block; padding: 8px;
+      margin: 6px 0; border: 1px solid #ccc;
+      border-radius: 4px; cursor: pointer;
+      transition: .2s;
+    }
+    .answers input { margin-right: 8px; }
+    .btn {
+      display: inline-block; padding: 10px 18px;
+      margin-top: 15px; background: var(--accent);
+      color: #fff; border: none; border-radius: 4px;
+      cursor: pointer;
+    }
+    .feedback {
+      margin-top: 12px; padding: 8px;
+      border-radius: 4px; font-weight: bold;
+    }
+    .feedback.correct { background: var(--correct); color: #fff; }
+    .feedback.incorrect { background: var(--incorrect); color: #fff; }
+    .result {
+      text-align: left; max-width: 700px; margin: 30px auto;
+      font-size: 1.1em;
+    }
+    .result h2 { text-align: center; }
+    .result ol { padding-left: 20px; }
+    .result li { margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+  <h1>Kviz: Računarski hardver</h1>
+  <div class="container" id="quiz-container">
+    <div id="question-number"></div>
+    <div id="question-text" class="question"></div>
+    <div id="answers" class="answers"></div>
+    <div id="feedback" class="feedback"></div>
+    <button id="next-btn" class="btn" style="display:none;">Dalje</button>
+  </div>
+
+  <div id="result" class="result" style="display:none;"></div>
+
+  <script>
+    const quiz = [
+      {
+        q: "Šta je glavni zadatak procesora (CPU)?",
+        options: [
+          "Čuvanje podataka",
+          "Prikazivanje slike na ekranu",
+          "Izvršavanje instrukcija i proračuna",
+          "Napajanje komponenti"
+        ],
+        answer: 2,
+        explanation: "Procesor izvršava instrukcije i obavlja sve proračune."
+      },
+      {
+        q: "U kojoj jedinici se meri brzina procesora?",
+        options: ["Megahercima (MHz)", "Gigabajtima (GB)", "Gigahercima (GHz)", "Hercometrijama (Hz)"],
+        answer: 2,
+        explanation: "GHz (gigaherc) meri broj ciklusa u sekundi."
+      },
+      {
+        q: "Šta označava broj jezgara na procesoru?",
+        options: [
+          "Koliko memorije CPU ima",
+          "Koliko zadataka može istovremeno da obradi",
+          "Brzinu hlađenja",
+          "Veličinu keš memorije"
+        ],
+        answer: 1,
+        explanation: "Svako jezgro može nezavisno da izvršava zadatke."
+      },
+      {
+        q: "Zašto procesor treba hladnjak?",
+        options: [
+          "Da bi bolje skladištio podatke",
+          "Da bi se sprečilo pregrevanje",
+          "Da bi povećao brzinu",
+          "Nije mu potreban"
+        ],
+        answer: 1,
+        explanation: "Hladnjak odvodi toplotu nastalu proračunima."
+      },
+      {
+        q: "Koja komponenta služi kao kratkoročna (RAM) memorija?",
+        options: ["SSD", "HDD", "RAM", "CPU"],
+        answer: 2,
+        explanation: "RAM čuva podatke koje CPU trenutno koristi."
+      },
+      {
+        q: "Šta znači da je RAM 'volatilna' memorija?",
+        options: [
+          "Podaci ostaju trajno",
+          "Bitke se sprečavaju",
+          "Podaci se brišu kada se isključi struja",
+          "Brže je od SSD-a"
+        ],
+        answer: 2,
+        explanation: "Volatilna znači da gubi sadržaj kad nema napajanja."
+      },
+      {
+        q: "Kako veći kapacitet RAM-a utiče na rad računara?",
+        options: [
+          "Smanjuje multitasking",
+          "Povećava broj istovremenih programa",
+          "Usmerava napajanje",
+          "Poboljšava grafiku"
+        ],
+        answer: 1,
+        explanation: "Više RAM-a omogućava pokretanje više aplikacija."
+      },
+      {
+        q: "Koja vrsta skladišta koristi rotirajuće ploče?",
+        options: ["SSD", "HDD", "Flash disk", "Magnetna traka"],
+        answer: 1,
+        explanation: "HDD čuva podatke na mehaničkim pločama."
+      },
+      {
+        q: "Koja skladišna jedinica nema pokretne delove i brža je?",
+        options: ["HDD", "Blu-ray disk", "SSD", "Magnetna traka"],
+        answer: 2,
+        explanation: "SSD koristi flash memoriju bez pokretnih delova."
+      },
+      {
+        q: "Koja komponenta povezuje sve ostale delove računara?",
+        options: ["Matična ploča", "RAM", "Grafička kartica", "Napajanje"],
+        answer: 0,
+        explanation: "Matična ploča služi kao centralna veza za sve komponente."
+      },
+      {
+        q: "Koji deo matične ploče kontroliše protok podataka?",
+        options: ["Slotovi", "Čipset", "Heatsink", "BIOS"],
+        answer: 1,
+        explanation: "Čipset upravlja komunikacijom između komponenti."
+      },
+      {
+        q: "Koji port se najčešće koristi za povezivanje monitora?",
+        options: ["USB", "HDMI/DisplayPort", "Ethernet", "Audio jack"],
+        answer: 1,
+        explanation: "HDMI i DisplayPort prenose video signal."
+      },
+      {
+        q: "Čemu služi zvučna kartica?",
+        options: [
+          "Prikaz slike",
+          "Obrada podataka",
+          "Generisanje i reprodukcija zvuka",
+          "Kontrola ventilatora"
+        ],
+        answer: 2,
+        explanation: "Zvučna kartica menja digitalne podatke u analogni zvuk."
+      },
+      {
+        q: "Koja komponenta pretvara struju iz utičnice u napon za računar?",
+        options: ["CPU", "RAM", "PSU (napajanje)", "Chipset"],
+        answer: 2,
+        explanation: "PSU obezbeđuje stabilnu električnu energiju."
+      },
+      {
+        q: "Koja je najbolja praksa za čišćenje računara?",
+        options: [
+          "Nikada ne čistiti",
+          "Koristiti komprimovani vazduh za prašinu",
+          "Pražniti bateriju svaki dan",
+          "Stavljati ga u zatvoreni ormar"
+        ],
+        answer: 1,
+        explanation: "Komprimovani vazduh uklanja prašinu bez oštećenja."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    const userAnswers = [];
+
+    const quizContainer = document.getElementById('quiz-container');
+    const qNumElem      = document.getElementById('question-number');
+    const qTextElem     = document.getElementById('question-text');
+    const answersElem   = document.getElementById('answers');
+    const feedbackElem  = document.getElementById('feedback');
+    const nextBtn       = document.getElementById('next-btn');
+    const resultElem    = document.getElementById('result');
+
+    function loadQuestion() {
+      const q = quiz[currentQuestion];
+      qNumElem.textContent = `Pitanje ${currentQuestion + 1} od ${quiz.length}`;
+      qTextElem.textContent = q.q;
+      answersElem.innerHTML = '';
+      feedbackElem.textContent = '';
+      feedbackElem.className = 'feedback';
+      nextBtn.style.display = 'none';
+
+      q.options.forEach((opt, idx) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type  = 'radio';
+        input.name  = 'answer';
+        input.value = idx;
+        input.addEventListener('change', () => showFeedback(idx));
+        label.appendChild(input);
+        label.append(` ${opt}`);
+        answersElem.appendChild(label);
+      });
+    }
+
+    function showFeedback(selectedIdx) {
+      userAnswers[currentQuestion] = selectedIdx;
+      const q = quiz[currentQuestion];
+      if (selectedIdx === q.answer) {
+        feedbackElem.textContent = `✅ Tačno! ${q.explanation}`;
+        feedbackElem.classList.add('correct');
+        score++;
+      } else {
+        feedbackElem.textContent = `❌ Netačno. ${q.explanation}`;
+        feedbackElem.classList.add('incorrect');
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentQuestion++;
+      if (currentQuestion < quiz.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      quizContainer.style.display = 'none';
+      resultElem.style.display    = 'block';
+
+      // Prikaz ukupnog rezultata
+      let html = `<h2>🎯 Tvoj rezultat: ${score} / ${quiz.length}</h2>
+                  <h3>Pregled tvojih odgovora:</h3>
+                  <ol>`;
+      quiz.forEach((q, idx) => {
+        const ua = userAnswers[idx];
+        html += `<li>
+          <strong>${q.q}</strong><br>
+          Tvoj odgovor: <em>${q.options[ua] ?? 'Nisi odgovorio/la'}</em><br>
+          Tačan odgovor: <strong>${q.options[q.answer]}</strong>
+        </li>`;
+      });
+      html += `</ol>`;
+      resultElem.innerHTML = html;
+    }
+
+    // Start
+    loadQuestion();
+  </script>
+</body>
+</html>
