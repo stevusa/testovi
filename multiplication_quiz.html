@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kviz - Tablica množenja</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .game-modes {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .mode-btn.easy { background: #2ecc71; }
+        .mode-btn.medium { background: #f39c12; }
+        .mode-btn.hard { background: #e74c3c; }
+        .mode-btn.active { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .question-container {
+            background: #ecf0f1;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 3px dashed #bdc3c7;
+        }
+
+        .question {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .answer-input {
+            font-size: 2em;
+            padding: 15px;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            text-align: center;
+            width: 150px;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .feedback {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 10px 0;
+        }
+
+        .final-score {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .score-emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            80% { transform: translateY(-10px); }
+        }
+
+        .bounce {
+            animation: bounce 1s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>🧮 KVIZ TABLICE MNOŽENJA 🧮</h1>
+        <p class="subtitle">Testiraj svoje znanje tablice množenja!</p>
+
+        <div class="game-modes">
+            <button class="mode-btn easy active" data-mode="easy">🟢 Lako (1-5)</button>
+            <button class="mode-btn medium" data-mode="medium">🟡 Srednje (1-8)</button>
+            <button class="mode-btn hard" data-mode="hard">🔴 Teško (1-10)</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="correct-count">0</div>
+                <div class="stat-label">Tačno</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-count">0</div>
+                <div class="stat-label">Ukupno</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="percentage">0%</div>
+                <div class="stat-label">Procenat</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div class="timer" id="timer">⏰ Vreme: 30s</div>
+
+        <div class="question-container" id="question-container">
+            <div class="question" id="question">Pritisnite START za početak!</div>
+            <input type="number" class="answer-input" id="answer" placeholder="?" disabled>
+            <button class="submit-btn" id="submit-btn" disabled>POTVRDI</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="final-score hidden" id="final-score">
+            <div class="score-emoji" id="score-emoji">🎉</div>
+            <h2 id="final-message">Bravo!</h2>
+            <p id="final-stats">Završili ste sa odličnim rezultatom!</p>
+        </div>
+
+        <button class="restart-btn" id="start-btn">🚀 POČNI KVIZ</button>
+        <button class="restart-btn hidden" id="restart-btn">🔄 PONOVI</button>
+    </div>
+
+    <script>
+        class MultiplicationQuiz {
+            constructor() {
+                this.currentMode = 'easy';
+                this.maxNumber = 5;
+                this.correctAnswers = 0;
+                this.totalQuestions = 0;
+                this.questionsPerRound = 10;
+                this.currentQuestion = 0;
+                this.timeLeft = 30;
+                this.timer = null;
+                this.gameActive = false;
+                
+                this.num1 = 0;
+                this.num2 = 0;
+                this.correctAnswer = 0;
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.generateQuestion();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    modeBtns: document.querySelectorAll('.mode-btn'),
+                    correctCount: document.getElementById('correct-count'),
+                    totalCount: document.getElementById('total-count'),
+                    percentage: document.getElementById('percentage'),
+                    progress: document.getElementById('progress'),
+                    timer: document.getElementById('timer'),
+                    question: document.getElementById('question'),
+                    questionContainer: document.getElementById('question-container'),
+                    answerInput: document.getElementById('answer'),
+                    submitBtn: document.getElementById('submit-btn'),
+                    feedback: document.getElementById('feedback'),
+                    finalScore: document.getElementById('final-score'),
+                    scoreEmoji: document.getElementById('score-emoji'),
+                    finalMessage: document.getElementById('final-message'),
+                    finalStats: document.getElementById('final-stats'),
+                    startBtn: document.getElementById('start-btn'),
+                    restartBtn: document.getElementById('restart-btn')
+                };
+            }
+
+            attachEventListeners() {
+                // Mode selection
+                this.elements.modeBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setMode(e.target.dataset.mode));
+                });
+
+                // Answer submission
+                this.elements.submitBtn.addEventListener('click', () => this.submitAnswer());
+                this.elements.answerInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.submitAnswer();
+                });
+
+                // Game controls
+                this.elements.startBtn.addEventListener('click', () => this.startGame());
+                this.elements.restartBtn.addEventListener('click', () => this.restartGame());
+            }
+
+            setMode(mode) {
+                this.currentMode = mode;
+                this.maxNumber = mode === 'easy' ? 5 : mode === 'medium' ? 8 : 10;
+                
+                this.elements.modeBtns.forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+                
+                this.generateQuestion();
+            }
+
+            startGame() {
+                this.gameActive = true;
+                this.correctAnswers = 0;
+                this.totalQuestions = 0;
+                this.currentQuestion = 0;
+                this.timeLeft = 30;
+
+                this.elements.startBtn.classList.add('hidden');
+                this.elements.answerInput.disabled = false;
+                this.elements.submitBtn.disabled = false;
+                this.elements.feedback.textContent = '';
+                this.elements.finalScore.classList.add('hidden');
+
+                this.generateQuestion();
+                this.startTimer();
+                this.updateStats();
+            }
+
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.elements.timer.textContent = `⏰ Vreme: ${this.timeLeft}s`;
+                    
+                    if (this.timeLeft <= 5) {
+                        this.elements.timer.style.color = '#e74c3c';
+                        this.elements.timer.classList.add('bounce');
+                    }
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+
+            generateQuestion() {
+                if (!this.gameActive && this.elements.startBtn.textContent !== '🚀 POČNI KVIZ') {
+                    return;
+                }
+
+                this.num1 = Math.floor(Math.random() * this.maxNumber) + 1;
+                this.num2 = Math.floor(Math.random() * this.maxNumber) + 1;
+                this.correctAnswer = this.num1 * this.num2;
+
+                this.elements.question.textContent = `${this.num1} × ${this.num2} = ?`;
+                this.elements.answerInput.value = '';
+                this.elements.answerInput.focus();
+                this.elements.feedback.textContent = '';
+                this.elements.feedback.className = 'feedback';
+            }
+
+            submitAnswer() {
+                if (!this.gameActive) return;
+
+                const userAnswer = parseInt(this.elements.answerInput.value);
+                this.totalQuestions++;
+                this.currentQuestion++;
+
+                if (userAnswer === this.correctAnswer) {
+                    this.correctAnswers++;
+                    this.showFeedback(true, 'Bravo! Tačan odgovor! 🎉');
+                    this.elements.questionContainer.classList.add('bounce');
+                } else {
+                    this.showFeedback(false, `Netačno! Tačan odgovor je ${this.correctAnswer} 📚`);
+                    this.elements.questionContainer.classList.add('shake');
+                }
+
+                setTimeout(() => {
+                    this.elements.questionContainer.classList.remove('bounce', 'shake');
+                }, 1000);
+
+                this.updateStats();
+
+                if (this.currentQuestion >= this.questionsPerRound) {
+                    setTimeout(() => this.endGame(), 1500);
+                } else {
+                    setTimeout(() => this.generateQuestion(), 1500);
+                }
+            }
+
+            showFeedback(isCorrect, message) {
+                this.elements.feedback.textContent = message;
+                this.elements.feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            }
+
+            updateStats() {
+                this.elements.correctCount.textContent = this.correctAnswers;
+                this.elements.totalCount.textContent = this.totalQuestions;
+                
+                const percentage = this.totalQuestions > 0 ? 
+                    Math.round((this.correctAnswers / this.totalQuestions) * 100) : 0;
+                this.elements.percentage.textContent = `${percentage}%`;
+
+                const progress = (this.currentQuestion / this.questionsPerRound) * 100;
+                this.elements.progress.style.width = `${progress}%`;
+            }
+
+            endGame() {
+                this.gameActive = false;
+                clearInterval(this.timer);
+
+                this.elements.answerInput.disabled = true;
+                this.elements.submitBtn.disabled = true;
+                this.elements.restartBtn.classList.remove('hidden');
+
+                const percentage = Math.round((this.correctAnswers / this.totalQuestions) * 100);
+                
+                let emoji, message;
+                if (percentage >= 90) {
+                    emoji = '🏆'; message = 'ODLIČAN REZULTAT!';
+                } else if (percentage >= 75) {
+                    emoji = '🌟'; message = 'VRLO DOBRO!';
+                } else if (percentage >= 60) {
+                    emoji = '👍'; message = 'DOBRO!';
+                } else {
+                    emoji = '💪'; message = 'NASTAVI DA VEŽBAŠ!';
+                }
+
+                this.elements.scoreEmoji.textContent = emoji;
+                this.elements.finalMessage.textContent = message;
+                this.elements.finalStats.textContent = 
+                    `Tačno ste odgovorili na ${this.correctAnswers} od ${this.totalQuestions} pitanja (${percentage}%)`;
+
+                this.elements.finalScore.classList.remove('hidden');
+                this.elements.questionContainer.style.opacity = '0.5';
+            }
+
+            restartGame() {
+                clearInterval(this.timer);
+                this.timeLeft = 30;
+                this.elements.timer.textContent = '⏰ Vreme: 30s';
+                this.elements.timer.style.color = '#e74c3c';
+                this.elements.timer.classList.remove('bounce');
+                this.elements.questionContainer.style.opacity = '1';
+                this.elements.restartBtn.classList.add('hidden');
+                this.elements.progress.style.width = '0%';
+                this.startGame();
+            }
+        }
+
+        // Initialize the quiz when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MultiplicationQuiz();
+        });
+    </script>
+</body>
+</html>
